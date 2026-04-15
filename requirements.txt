@@ -6,6 +6,6 @@ pydantic[email]>=2.0
 python-multipart
 email-validator
 psycopg2-binary
-passlib[bcrypt]
+bcrypt
 itsdangerous
 gunicorn
