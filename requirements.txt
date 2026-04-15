@@ -9,3 +9,4 @@ psycopg2-binary
 bcrypt
 itsdangerous
 gunicorn
+fpdf2
