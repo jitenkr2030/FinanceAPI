@@ -11,5 +11,6 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
 
     api_key = Column(String, unique=True, index=True)
+    hashed_password = Column(String, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)

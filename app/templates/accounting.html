@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Accounting — FinanceAPI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+  {% include 'sidebar.html' %}
+  <main class="ml-64 flex-1 p-8">
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Accounting Ledger</h1>
+        <p class="text-gray-500 mt-1">Track your credits and debits.</p>
+      </div>
+      <button onclick="document.getElementById('modal').classList.remove('hidden')"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add Entry
+      </button>
+    </div>
+
+    <!-- Summary -->
+    {% if entries %}
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="bg-green-50 border border-green-100 rounded-2xl p-5">
+        <div class="text-sm text-green-700 font-medium mb-1">Total Credits</div>
+        <div class="text-2xl font-bold text-green-800">${{ "%.2f"|format(entries|selectattr('entry_type','equalto','credit')|map(attribute='amount')|sum) }}</div>
+      </div>
+      <div class="bg-red-50 border border-red-100 rounded-2xl p-5">
+        <div class="text-sm text-red-700 font-medium mb-1">Total Debits</div>
+        <div class="text-2xl font-bold text-red-800">${{ "%.2f"|format(entries|selectattr('entry_type','equalto','debit')|map(attribute='amount')|sum) }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {% if entries %}
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Type</th>
+            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Description</th>
+            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Date</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          {% for e in entries %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                {% if e.entry_type == 'credit' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                {{ e.entry_type|capitalize }}
+              </span>
+            </td>
+            <td class="px-6 py-4 font-semibold {% if e.entry_type == 'credit' %}text-green-700{% else %}text-red-700{% endif %}">
+              {% if e.entry_type == 'credit' %}+{% else %}-{% endif %}${{ "%.2f"|format(e.amount) }}
+            </td>
+            <td class="px-6 py-4 text-gray-600">{{ e.description or '—' }}</td>
+            <td class="px-6 py-4 text-gray-400">{{ e.created_at.strftime('%b %d, %Y') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="py-20 text-center">
+        <div class="text-5xl mb-4">📚</div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-1">No ledger entries yet</h3>
+        <p class="text-gray-500 text-sm">Add your first credit or debit entry.</p>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-gray-900">Add Ledger Entry</h2>
+        <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form method="post" action="/dashboard/accounting" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Entry Type</label>
+          <select name="entry_type" required class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            <option value="credit">Credit</option>
+            <option value="debit">Debit</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Amount ($)</label>
+          <input type="number" name="amount" required step="0.01" min="0" placeholder="500.00"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+          <input type="text" name="description" placeholder="e.g. Client payment, Office rent"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm mt-2">Add Entry</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
