@@ -1,24 +1,21 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 from typing import Optional
 
-# Create invoice
 class InvoiceCreate(BaseModel):
     customer_name: str
-    customer_email: Optional[EmailStr]
+    customer_email: Optional[EmailStr] = None
     amount: float
     tax: float
 
-# Response model
 class InvoiceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     customer_name: str
-    customer_email: Optional[EmailStr]
+    customer_email: Optional[EmailStr] = None
     amount: float
     tax: float
     total: float
     status: str
     created_at: datetime
-
-    class Config:
-        orm_mode = True

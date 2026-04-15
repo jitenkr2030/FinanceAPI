@@ -1,6 +1,8 @@
-fastapi==0.95.2
-uvicorn==0.22.0
-sqlalchemy==1.4.52
-sqladmin==0.14.0
-pydantic==1.10.13
+fastapi>=0.100.0
+uvicorn>=0.23.0
+sqlalchemy>=2.0
+sqladmin>=0.15.0
+pydantic[email]>=2.0
 python-multipart
+email-validator
+psycopg2-binary

@@ -1,20 +1,17 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 
-# Create ledger entry
 class LedgerCreate(BaseModel):
-    entry_type: str  # credit / debit
+    entry_type: str
     amount: float
-    description: Optional[str]
+    description: Optional[str] = None
 
-# Response model
 class LedgerResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     entry_type: str
     amount: float
-    description: Optional[str]
+    description: Optional[str] = None
     created_at: datetime
-
-    class Config:
-        orm_mode = True
