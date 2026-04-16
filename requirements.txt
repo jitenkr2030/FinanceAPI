@@ -10,3 +10,5 @@ bcrypt
 itsdangerous
 gunicorn
 fpdf2
+pyotp
+qrcode
